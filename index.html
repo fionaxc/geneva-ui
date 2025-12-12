@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GENEVA - Evaluation Interface</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: #f8fafc;
+      min-height: 100vh;
+      color: #1e293b;
+    }
+
+    /* Upload Screen */
+    .upload-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .upload-container {
+      background: white;
+      border-radius: 12px;
+      padding: 48px;
+      max-width: 560px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+
+    .upload-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .upload-subtitle {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 32px;
+    }
+
+    .upload-group {
+      margin-bottom: 24px;
+    }
+
+    .upload-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .upload-hint {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      border: 2px dashed #e2e8f0;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .file-input-wrapper:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    .file-input-wrapper.has-file {
+      border-color: #10b981;
+      background: #f0fdf4;
+    }
+
+    .file-input-wrapper input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-input-text {
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .file-input-wrapper.has-file .file-input-text {
+      color: #059669;
+      font-weight: 500;
+    }
+
+    .btn-start {
+      width: 100%;
+      padding: 14px;
+      background: #1e293b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 16px;
+    }
+
+    .btn-start:hover {
+      background: #334155;
+    }
+
+    .btn-start:disabled {
+      background: #cbd5e1;
+      cursor: not-allowed;
+    }
+
+    /* Main App */
+    .app {
+      display: none;
+    }
+
+    .app.active {
+      display: block;
+    }
+
+    /* Header */
+    .header {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .header-center {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .case-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .case-select {
+      padding: 6px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'IBM Plex Mono', monospace;
+      background: white;
+      cursor: pointer;
+    }
+
+    .nav-btn {
+      padding: 6px 12px;
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #64748b;
+      cursor: pointer;
+    }
+
+    .nav-btn:hover {
+      background: #f8fafc;
+      color: #334155;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn-ghost:hover {
+      background: #f1f5f9;
+    }
+
+    .btn-primary {
+      background: #1e293b;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #334155;
+    }
+
+    /* Main Layout */
+    .main {
+      display: grid;
+      grid-template-columns: 280px 1fr 320px;
+      min-height: calc(100vh - 49px);
+    }
+
+    /* Left Panel */
+    .patient-panel {
+      background: white;
+      border-right: 1px solid #e2e8f0;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .section {
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 10px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .patient-id {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .patient-meta {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .causal-gene-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+
+    .causal-gene-label {
+      font-size: 10px;
+      color: #16a34a;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .causal-gene-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      color: #166534;
+      margin-top: 2px;
+    }
+
+    .causal-gene-rank {
+      font-size: 11px;
+      color: #16a34a;
+      margin-top: 4px;
+    }
+
+    /* Gene List */
+    .gene-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .gene-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .gene-item:hover {
+      background: #f8fafc;
+    }
+
+    .gene-item.active {
+      background: #f1f5f9;
+    }
+
+    .gene-item.causal {
+      background: #f0fdf4;
+    }
+
+    .gene-item.causal.active {
+      background: #dcfce7;
+    }
+
+    .gene-rank {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: #94a3b8;
+      width: 24px;
+    }
+
+    .gene-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: #334155;
+      flex: 1;
+    }
+
+    .gene-item.causal .gene-name {
+      color: #166534;
+    }
+
+    .gene-status {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e2e8f0;
+    }
+
+    .gene-status.evaluated {
+      background: #10b981;
+    }
+
+    /* Center Panel */
+    .content-panel {
+      padding: 20px 24px;
+      overflow-y: auto;
+    }
+
+    .gene-header {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .gene-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .gene-symbol {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .gene-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .rank-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .rank-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .rank-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .rank-dot.kg { background: #14b8a6; }
+    .rank-dot.omim { background: #ea580c; }
+    .rank-dot.gr { background: #9333ea; }
+    .rank-dot.llm { background: #f59e0b; }
+    .rank-dot.sp { background: #6366f1; }
+    .rank-dot.final { background: #10b981; }
+
+    /* Evidence Sections */
+    .evidence-section {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .evidence-header {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .evidence-header:hover {
+      background: #f8fafc;
+    }
+
+    .evidence-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .evidence-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+
+    .evidence-indicator.kg { background: #14b8a6; }
+    .evidence-indicator.omim { background: #ea580c; }
+    .evidence-indicator.gr { background: #9333ea; }
+    .evidence-indicator.llm { background: #f59e0b; }
+    .evidence-indicator.sp { background: #6366f1; }
+    .evidence-indicator.final { background: #10b981; }
+
+    .evidence-meta {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .evidence-body {
+      display: none;
+      padding: 0 16px 16px;
+    }
+
+    .evidence-section.expanded .evidence-body {
+      display: block;
+    }
+
+    .evidence-text {
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.6;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border-radius: 6px;
+    }
+
+    .evidence-section.final {
+      background: #f0fdf4;
+      border-color: #86efac;
+    }
+
+    .evidence-section.final .evidence-text {
+      background: white;
+      border: 1px solid #bbf7d0;
+    }
+
+    .no-evidence {
+      font-size: 12px;
+      color: #94a3b8;
+      font-style: italic;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border-radius: 6px;
+    }
+
+    /* Right Panel - Evaluation */
+    .eval-panel {
+      background: white;
+      border-left: 1px solid #e2e8f0;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .eval-section {
+      margin-bottom: 24px;
+    }
+
+    .eval-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .eval-group {
+      margin-bottom: 16px;
+    }
+
+    .eval-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.1s;
+      font-size: 11px;
+      color: #475569;
+      line-height: 1.4;
+    }
+
+    .radio-option:hover {
+      border-color: #cbd5e1;
+    }
+
+    .radio-option.selected {
+      border-color: #1e293b;
+      background: #f8fafc;
+    }
+
+    .radio-option input { display: none; }
+
+    .radio-check {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #cbd5e1;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .radio-option.selected .radio-check {
+      border-color: #1e293b;
+    }
+
+    .radio-option.selected .radio-check::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #1e293b;
+      border-radius: 50%;
+    }
+
+    .rating-scale {
+      display: flex;
+      gap: 4px;
+    }
+
+    .rating-btn {
+      flex: 1;
+      padding: 8px 0;
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 5px;
+      font-size: 12px;
+      color: #64748b;
+      cursor: pointer;
+    }
+
+    .rating-btn:hover {
+      border-color: #cbd5e1;
+    }
+
+    .rating-btn.selected {
+      background: #1e293b;
+      border-color: #1e293b;
+      color: white;
+    }
+
+    .rating-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: #94a3b8;
+      margin-top: 3px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .checkbox-option {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 11px;
+      color: #475569;
+    }
+
+    .checkbox-option:hover {
+      border-color: #cbd5e1;
+    }
+
+    .checkbox-option.selected {
+      border-color: #1e293b;
+      background: #f8fafc;
+    }
+
+    .checkbox-option input { display: none; }
+
+    .source-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 2px;
+    }
+
+    .source-dot.kg { background: #14b8a6; }
+    .source-dot.omim { background: #ea580c; }
+    .source-dot.gr { background: #9333ea; }
+    .source-dot.llm { background: #f59e0b; }
+    .source-dot.sp { background: #6366f1; }
+
+    .eval-textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      font-size: 11px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .eval-textarea:focus {
+      outline: none;
+      border-color: #94a3b8;
+    }
+
+    .eval-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 20px 0;
+    }
+
+    .save-section {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-save {
+      width: 100%;
+      padding: 10px;
+      background: #1e293b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-save:hover {
+      background: #334155;
+    }
+
+    .save-hint {
+      font-size: 10px;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Upload Screen -->
+  <div class="upload-screen" id="uploadScreen">
+    <div class="upload-container">
+      <h1 class="upload-title">GENEVA Evaluation</h1>
+      <p class="upload-subtitle">Upload your GENEVA output files to begin evaluation</p>
+
+      <div class="upload-group">
+        <label class="upload-label">Detailed Rankings CSV</label>
+        <div class="file-input-wrapper" id="detailedWrapper">
+          <input type="file" accept=".csv" id="detailedFile" onchange="handleFileSelect(this, 'detailed')">
+          <span class="file-input-text" id="detailedText">Click to upload or drag and drop</span>
+        </div>
+        <p class="upload-hint">Contains gene rankings and explanations for all evidence sources</p>
+      </div>
+
+      <div class="upload-group">
+        <label class="upload-label">Summary CSV</label>
+        <div class="file-input-wrapper" id="summaryWrapper">
+          <input type="file" accept=".csv" id="summaryFile" onchange="handleFileSelect(this, 'summary')">
+          <span class="file-input-text" id="summaryText">Click to upload or drag and drop</span>
+        </div>
+        <p class="upload-hint">Contains patient IDs, true genes, and final rankings</p>
+      </div>
+
+      <button class="btn-start" id="startBtn" disabled onclick="startEvaluation()">
+        Start Evaluation
+      </button>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div class="app" id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">GENEVA Evaluation</div>
+      <div class="header-center">
+        <div class="case-nav">
+          <button class="nav-btn" onclick="prevCase()">← Prev</button>
+          <select class="case-select" id="caseSelect" onchange="loadCase(this.value)"></select>
+          <button class="nav-btn" onclick="nextCase()">Next →</button>
+        </div>
+        <span class="progress-text" id="progressText">0 / 0 cases</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" onclick="exportEvaluations()">Export Evaluations</button>
+        <button class="btn btn-primary" onclick="saveAndNext()">Save & Next</button>
+      </div>
+    </header>
+
+    <!-- Main Layout -->
+    <main class="main">
+      <!-- Left Panel -->
+      <aside class="patient-panel">
+        <div class="section">
+          <div class="section-title">Patient</div>
+          <div class="patient-id" id="patientId">—</div>
+          <div class="patient-meta" id="patientMeta">—</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">True Causal Gene</div>
+          <div class="causal-gene-box">
+            <div class="causal-gene-label">Ground Truth</div>
+            <div class="causal-gene-name" id="causalGeneName">—</div>
+            <div class="causal-gene-rank" id="causalGeneRank">—</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Candidate Genes</div>
+          <div class="gene-list" id="geneList"></div>
+        </div>
+      </aside>
+
+      <!-- Center Panel -->
+      <section class="content-panel">
+        <div class="gene-header">
+          <div class="gene-title-row">
+            <span class="gene-symbol" id="currentGeneSymbol">—</span>
+            <span class="gene-badge hidden" id="causalBadge">Causal Gene</span>
+          </div>
+          <div class="rank-summary" id="rankSummary"></div>
+        </div>
+
+        <div id="evidenceSections"></div>
+      </section>
+
+      <!-- Right Panel -->
+      <aside class="eval-panel">
+        <div class="eval-section">
+          <div class="eval-title">Evidence Quality</div>
+
+          <div class="eval-group">
+            <div class="eval-label">Evidence Traceability</div>
+            <div class="radio-group" data-field="traceability">
+              <label class="radio-option" onclick="selectRadio(this)">
+                <input type="radio" name="traceability" value="traceable">
+                <span class="radio-check"></span>
+                <span>Claims tied to identifiable sources</span>
+              </label>
+              <label class="radio-option" onclick="selectRadio(this)">
+                <input type="radio" name="traceability" value="partial">
+                <span class="radio-check"></span>
+                <span>Some claims lack attribution</span>
+              </label>
+              <label class="radio-option" onclick="selectRadio(this)">
+                <input type="radio" name="traceability" value="untraceable">
+                <span class="radio-check"></span>
+                <span>Claims not traceable</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="eval-group">
+            <div class="eval-label">Phenotype Match Specificity</div>
+            <div class="radio-group" data-field="phenotype_match">
+              <label class="radio-option" onclick="selectRadio(this)">
+                <input type="radio" name="phenotype_match" value="specific_mechanistic">
+                <span class="radio-check"></span>
+                <span>Specific HPO terms with mechanistic links</span>
+              </label>
+              <label class="radio-option" onclick="selectRadio(this)">
+                <input type="radio" name="phenotype_match" value="references_no_mechanism">
+                <span class="radio-check"></span>
+                <span>References phenotypes, lacks mechanism</span>
+              </label>
+              <label class="radio-option" onclick="selectRadio(this)">
+                <input type="radio" name="phenotype_match" value="generic">
+                <span class="radio-check"></span>
+                <span>Generic or no phenotype references</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="eval-group">
+            <div class="eval-label">Evidence Factuality</div>
+            <div class="radio-group" data-field="factuality">
+              <label class="radio-option" onclick="selectRadio(this)">
+                <input type="radio" name="factuality" value="correct">
+                <span class="radio-check"></span>
+                <span>Correct — factually accurate</span>
+              </label>
+              <label class="radio-option" onclick="selectRadio(this)">
+                <input type="radio" name="factuality" value="minor_error">
+                <span class="radio-check"></span>
+                <span>Minor error — doesn't change interpretation</span>
+              </label>
+              <label class="radio-option" onclick="selectRadio(this)">
+                <input type="radio" name="factuality" value="major_error">
+                <span class="radio-check"></span>
+                <span>Major error — clinically unsafe</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="eval-divider"></div>
+
+        <div class="eval-section">
+          <div class="eval-title">Clinical Assessment</div>
+
+          <div class="eval-group">
+            <div class="eval-label">Clinical Actionability</div>
+            <div class="radio-group" data-field="actionability">
+              <label class="radio-option" onclick="selectRadio(this)">
+                <input type="radio" name="actionability" value="confirm">
+                <span class="radio-check"></span>
+                <span>Order confirmatory testing</span>
+              </label>
+              <label class="radio-option" onclick="selectRadio(this)">
+                <input type="radio" name="actionability" value="keep">
+                <span class="radio-check"></span>
+                <span>Keep as candidate, seek more evidence</span>
+              </label>
+              <label class="radio-option" onclick="selectRadio(this)">
+                <input type="radio" name="actionability" value="discard">
+                <span class="radio-check"></span>
+                <span>Deprioritize / discard</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="eval-group">
+            <div class="eval-label">Action Confidence</div>
+            <div class="rating-scale" data-field="confidence">
+              <button class="rating-btn" onclick="selectRating(this, 'confidence', 1)">1</button>
+              <button class="rating-btn" onclick="selectRating(this, 'confidence', 2)">2</button>
+              <button class="rating-btn" onclick="selectRating(this, 'confidence', 3)">3</button>
+              <button class="rating-btn" onclick="selectRating(this, 'confidence', 4)">4</button>
+              <button class="rating-btn" onclick="selectRating(this, 'confidence', 5)">5</button>
+            </div>
+            <div class="rating-labels"><span>Not confident</span><span>Very confident</span></div>
+          </div>
+
+          <div class="eval-group">
+            <div class="eval-label">Interpretability</div>
+            <div class="rating-scale" data-field="interpretability">
+              <button class="rating-btn" onclick="selectRating(this, 'interpretability', 1)">1</button>
+              <button class="rating-btn" onclick="selectRating(this, 'interpretability', 2)">2</button>
+              <button class="rating-btn" onclick="selectRating(this, 'interpretability', 3)">3</button>
+              <button class="rating-btn" onclick="selectRating(this, 'interpretability', 4)">4</button>
+              <button class="rating-btn" onclick="selectRating(this, 'interpretability', 5)">5</button>
+            </div>
+            <div class="rating-labels"><span>Hard to understand</span><span>Very clear</span></div>
+          </div>
+
+          <div class="eval-group">
+            <div class="eval-label">Most Useful Evidence Source</div>
+            <div class="checkbox-group" data-field="preferred_source">
+              <label class="checkbox-option" onclick="toggleCheckbox(this)">
+                <input type="checkbox" value="kg">
+                <span class="source-dot kg"></span> KG
+              </label>
+              <label class="checkbox-option" onclick="toggleCheckbox(this)">
+                <input type="checkbox" value="omim">
+                <span class="source-dot omim"></span> OMIM
+              </label>
+              <label class="checkbox-option" onclick="toggleCheckbox(this)">
+                <input type="checkbox" value="gr">
+                <span class="source-dot gr"></span> GeneReviews
+              </label>
+              <label class="checkbox-option" onclick="toggleCheckbox(this)">
+                <input type="checkbox" value="llm">
+                <span class="source-dot llm"></span> LLM
+              </label>
+              <label class="checkbox-option" onclick="toggleCheckbox(this)">
+                <input type="checkbox" value="sp">
+                <span class="source-dot sp"></span> Similar Patients
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="eval-divider"></div>
+
+        <div class="eval-section">
+          <div class="eval-label">Notes</div>
+          <textarea class="eval-textarea" id="evalNotes" placeholder="Optional comments..."></textarea>
+        </div>
+
+        <div class="save-section">
+          <button class="btn-save" onclick="saveCurrentEvaluation()">Save Evaluation</button>
+          <div class="save-hint">Evaluations are stored locally</div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    // Global state
+    let detailedData = [];
+    let summaryData = [];
+    let evaluations = {};
+    let currentCaseIndex = 0;
+    let currentGeneIndex = 0;
+    let patients = [];
+
+    // File handling
+    function handleFileSelect(input, type) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const wrapper = document.getElementById(type + 'Wrapper');
+      const text = document.getElementById(type + 'Text');
+      
+      wrapper.classList.add('has-file');
+      text.textContent = file.name;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const csv = e.target.result;
+        if (type === 'detailed') {
+          detailedData = parseCSV(csv);
+        } else {
+          summaryData = parseCSV(csv);
+        }
+        checkFilesReady();
+      };
+      reader.readAsText(file);
+    }
+
+    function parseCSV(csv) {
+      const lines = csv.trim().split('\n');
+      const headers = parseCSVLine(lines[0]);
+      const data = [];
+      
+      for (let i = 1; i < lines.length; i++) {
+        const values = parseCSVLine(lines[i]);
+        const row = {};
+        headers.forEach((h, idx) => {
+          row[h] = values[idx] || '';
+        });
+        data.push(row);
+      }
+      return data;
+    }
+
+    function parseCSVLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim());
+      return result;
+    }
+
+    function checkFilesReady() {
+      const btn = document.getElementById('startBtn');
+      btn.disabled = !(detailedData.length > 0 && summaryData.length > 0);
+    }
+
+    function startEvaluation() {
+      // Get unique patients from summary
+      patients = summaryData.map(row => ({
+        patient_id: row.patient_id,
+        true_gene: row.true_gene,
+        final_rank: row.final_predicted_rank,
+        baseline_rank: row.baseline_predicted_rank,
+        total_candidates: row.total_candidates,
+        causality: row.final_causality_likelihood
+      }));
+
+      // Remove duplicates (keep first occurrence for patients with multiple true genes)
+      const seen = new Set();
+      patients = patients.filter(p => {
+        const key = p.patient_id + '_' + p.true_gene;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      // Populate case selector
+      const select = document.getElementById('caseSelect');
+      patients.forEach((p, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = p.patient_id;
+        select.appendChild(opt);
+      });
+
+      // Load stored evaluations
+      const stored = localStorage.getItem('geneva_evaluations');
+      if (stored) {
+        evaluations = JSON.parse(stored);
+      }
+
+      // Show app
+      document.getElementById('uploadScreen').style.display = 'none';
+      document.getElementById('app').classList.add('active');
+
+      // Load first case
+      loadCase(0);
+    }
+
+    function loadCase(index) {
+      currentCaseIndex = parseInt(index);
+      currentGeneIndex = 0;
+      
+      const patient = patients[currentCaseIndex];
+      const patientGenes = detailedData.filter(r => r.patient_id === patient.patient_id);
+      
+      // Sort by final_rank
+      patientGenes.sort((a, b) => parseInt(a.final_rank) - parseInt(b.final_rank));
+
+      // Update UI
+      document.getElementById('patientId').textContent = patient.patient_id;
+      document.getElementById('patientMeta').textContent = `${patientGenes.length} candidates`;
+      document.getElementById('causalGeneName').textContent = patient.true_gene;
+      document.getElementById('causalGeneRank').textContent = `Final Rank: #${patient.final_rank} | Baseline: #${patient.baseline_rank}`;
+      
+      document.getElementById('caseSelect').value = currentCaseIndex;
+      document.getElementById('progressText').textContent = `${currentCaseIndex + 1} / ${patients.length} cases`;
+
+      // Build gene list (top 10 or all if less)
+      const geneList = document.getElementById('geneList');
+      geneList.innerHTML = '';
+      
+      const topGenes = patientGenes.slice(0, Math.min(10, patientGenes.length));
+      topGenes.forEach((gene, i) => {
+        const isCausal = gene.gene_name === patient.true_gene;
+        const evalKey = `${patient.patient_id}_${gene.gene_name}`;
+        const isEvaluated = evaluations[evalKey] !== undefined;
+        
+        const div = document.createElement('div');
+        div.className = `gene-item ${isCausal ? 'causal' : ''} ${i === 0 ? 'active' : ''}`;
+        div.onclick = () => loadGene(i);
+        div.innerHTML = `
+          <span class="gene-rank">#${gene.final_rank}</span>
+          <span class="gene-name">${gene.gene_name}</span>
+          <span class="gene-status ${isEvaluated ? 'evaluated' : ''}"></span>
+        `;
+        geneList.appendChild(div);
+      });
+
+      loadGene(0);
+    }
+
+    function loadGene(index) {
+      currentGeneIndex = index;
+      
+      const patient = patients[currentCaseIndex];
+      const patientGenes = detailedData.filter(r => r.patient_id === patient.patient_id);
+      patientGenes.sort((a, b) => parseInt(a.final_rank) - parseInt(b.final_rank));
+      
+      const gene = patientGenes[index];
+      if (!gene) return;
+
+      const isCausal = gene.gene_name === patient.true_gene;
+
+      // Update gene list active state
+      document.querySelectorAll('.gene-item').forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+      });
+
+      // Update header
+      document.getElementById('currentGeneSymbol').textContent = gene.gene_name;
+      document.getElementById('causalBadge').classList.toggle('hidden', !isCausal);
+
+      // Rank summary
+      const rankSummary = document.getElementById('rankSummary');
+      rankSummary.innerHTML = `
+        ${gene.kg_rank ? `<div class="rank-item"><span class="rank-dot kg"></span> KG: #${gene.kg_rank}</div>` : ''}
+        ${gene.omim_rank ? `<div class="rank-item"><span class="rank-dot omim"></span> OMIM: #${gene.omim_rank}</div>` : ''}
+        ${gene.gr_rank ? `<div class="rank-item"><span class="rank-dot gr"></span> GR: #${gene.gr_rank}</div>` : ''}
+        ${gene.llm_rank ? `<div class="rank-item"><span class="rank-dot llm"></span> LLM: #${gene.llm_rank}</div>` : ''}
+        ${gene.sp_rank ? `<div class="rank-item"><span class="rank-dot sp"></span> SP: #${gene.sp_rank}</div>` : ''}
+        <div class="rank-item"><span class="rank-dot final"></span> <strong>Final: #${gene.final_rank}</strong></div>
+      `;
+
+      // Evidence sections
+      const evidenceSections = document.getElementById('evidenceSections');
+      evidenceSections.innerHTML = '';
+
+      const sources = [
+        { key: 'kg', name: 'Knowledge Graph', rank: gene.kg_rank, explanation: gene.kg_explanation, causality: gene.kg_causality_likelihood },
+        { key: 'omim', name: 'OMIM', rank: gene.omim_rank, explanation: gene.omim_explanation, causality: gene.omim_causality_likelihood },
+        { key: 'gr', name: 'GeneReviews', rank: gene.gr_rank, explanation: gene.gr_explanation, causality: gene.gr_causality_likelihood },
+        { key: 'llm', name: 'LLM Reasoning', rank: gene.llm_rank, explanation: gene.llm_explanation, causality: gene.llm_causality_likelihood },
+        { key: 'sp', name: 'Similar Patients', rank: gene.sp_rank, explanation: gene.sp_explanation, causality: gene.sp_causality_likelihood },
+      ];
+
+      sources.forEach(src => {
+        const section = document.createElement('div');
+        section.className = 'evidence-section expanded';
+        section.innerHTML = `
+          <div class="evidence-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="evidence-title">
+              <span class="evidence-indicator ${src.key}"></span>
+              ${src.name}
+            </div>
+            <div class="evidence-meta">
+              ${src.rank ? `#${src.rank} • ${src.causality || '—'}` : 'No data'}
+            </div>
+          </div>
+          <div class="evidence-body">
+            ${src.explanation ? `<div class="evidence-text">${src.explanation}</div>` : '<div class="no-evidence">No evidence available from this source</div>'}
+          </div>
+        `;
+        evidenceSections.appendChild(section);
+      });
+
+      // Merged rationale
+      const mergedSection = document.createElement('div');
+      mergedSection.className = 'evidence-section final expanded';
+      mergedSection.innerHTML = `
+        <div class="evidence-header" onclick="this.parentElement.classList.toggle('expanded')">
+          <div class="evidence-title">
+            <span class="evidence-indicator final"></span>
+            Merged Rationale
+          </div>
+          <div class="evidence-meta">
+            #${gene.baseline_rank} → #${gene.final_rank} • ${gene.final_causality_likelihood}
+          </div>
+        </div>
+        <div class="evidence-body">
+          <div class="evidence-text">${gene.merge_rationale || 'No merged rationale available'}</div>
+        </div>
+      `;
+      evidenceSections.appendChild(mergedSection);
+
+      // Load existing evaluation if any
+      loadEvaluation();
+    }
+
+    function loadEvaluation() {
+      const patient = patients[currentCaseIndex];
+      const patientGenes = detailedData.filter(r => r.patient_id === patient.patient_id);
+      patientGenes.sort((a, b) => parseInt(a.final_rank) - parseInt(b.final_rank));
+      const gene = patientGenes[currentGeneIndex];
+      
+      const evalKey = `${patient.patient_id}_${gene.gene_name}`;
+      const eval = evaluations[evalKey] || {};
+
+      // Reset all inputs
+      document.querySelectorAll('.radio-option').forEach(el => el.classList.remove('selected'));
+      document.querySelectorAll('.rating-btn').forEach(el => el.classList.remove('selected'));
+      document.querySelectorAll('.checkbox-option').forEach(el => el.classList.remove('selected'));
+      document.getElementById('evalNotes').value = '';
+
+      // Load saved values
+      if (eval.traceability) {
+        const radio = document.querySelector(`input[name="traceability"][value="${eval.traceability}"]`);
+        if (radio) radio.closest('.radio-option').classList.add('selected');
+      }
+      if (eval.phenotype_match) {
+        const radio = document.querySelector(`input[name="phenotype_match"][value="${eval.phenotype_match}"]`);
+        if (radio) radio.closest('.radio-option').classList.add('selected');
+      }
+      if (eval.factuality) {
+        const radio = document.querySelector(`input[name="factuality"][value="${eval.factuality}"]`);
+        if (radio) radio.closest('.radio-option').classList.add('selected');
+      }
+      if (eval.actionability) {
+        const radio = document.querySelector(`input[name="actionability"][value="${eval.actionability}"]`);
+        if (radio) radio.closest('.radio-option').classList.add('selected');
+      }
+      if (eval.confidence) {
+        const btns = document.querySelectorAll('[data-field="confidence"] .rating-btn');
+        btns[eval.confidence - 1]?.classList.add('selected');
+      }
+      if (eval.interpretability) {
+        const btns = document.querySelectorAll('[data-field="interpretability"] .rating-btn');
+        btns[eval.interpretability - 1]?.classList.add('selected');
+      }
+      if (eval.preferred_source) {
+        eval.preferred_source.forEach(src => {
+          const cb = document.querySelector(`input[type="checkbox"][value="${src}"]`);
+          if (cb) cb.closest('.checkbox-option').classList.add('selected');
+        });
+      }
+      if (eval.notes) {
+        document.getElementById('evalNotes').value = eval.notes;
+      }
+    }
+
+    function saveCurrentEvaluation() {
+      const patient = patients[currentCaseIndex];
+      const patientGenes = detailedData.filter(r => r.patient_id === patient.patient_id);
+      patientGenes.sort((a, b) => parseInt(a.final_rank) - parseInt(b.final_rank));
+      const gene = patientGenes[currentGeneIndex];
+      
+      const evalKey = `${patient.patient_id}_${gene.gene_name}`;
+
+      const eval = {
+        patient_id: patient.patient_id,
+        gene_name: gene.gene_name,
+        is_causal: gene.gene_name === patient.true_gene,
+        final_rank: gene.final_rank,
+        traceability: getSelectedRadio('traceability'),
+        phenotype_match: getSelectedRadio('phenotype_match'),
+        factuality: getSelectedRadio('factuality'),
+        actionability: getSelectedRadio('actionability'),
+        confidence: getSelectedRating('confidence'),
+        interpretability: getSelectedRating('interpretability'),
+        preferred_source: getSelectedCheckboxes('preferred_source'),
+        notes: document.getElementById('evalNotes').value,
+        timestamp: new Date().toISOString()
+      };
+
+      evaluations[evalKey] = eval;
+      localStorage.setItem('geneva_evaluations', JSON.stringify(evaluations));
+
+      // Update gene list status
+      const geneItems = document.querySelectorAll('.gene-item');
+      if (geneItems[currentGeneIndex]) {
+        geneItems[currentGeneIndex].querySelector('.gene-status').classList.add('evaluated');
+      }
+    }
+
+    function getSelectedRadio(name) {
+      const selected = document.querySelector(`input[name="${name}"]:checked`) ||
+                       document.querySelector(`.radio-group[data-field="${name}"] .radio-option.selected input`);
+      return selected ? selected.value : null;
+    }
+
+    function getSelectedRating(field) {
+      const selected = document.querySelector(`[data-field="${field}"] .rating-btn.selected`);
+      return selected ? parseInt(selected.textContent) : null;
+    }
+
+    function getSelectedCheckboxes(field) {
+      const selected = document.querySelectorAll(`[data-field="${field}"] .checkbox-option.selected input`);
+      return Array.from(selected).map(cb => cb.value);
+    }
+
+    function selectRadio(option) {
+      const group = option.closest('.radio-group');
+      group.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+      option.classList.add('selected');
+    }
+
+    function selectRating(btn, field, value) {
+      btn.closest('.rating-scale').querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
+    function toggleCheckbox(option) {
+      option.classList.toggle('selected');
+    }
+
+    function prevCase() {
+      if (currentCaseIndex > 0) {
+        loadCase(currentCaseIndex - 1);
+      }
+    }
+
+    function nextCase() {
+      if (currentCaseIndex < patients.length - 1) {
+        loadCase(currentCaseIndex + 1);
+      }
+    }
+
+    function saveAndNext() {
+      saveCurrentEvaluation();
+      
+      // Move to next gene or next case
+      const patient = patients[currentCaseIndex];
+      const patientGenes = detailedData.filter(r => r.patient_id === patient.patient_id);
+      const maxGenes = Math.min(10, patientGenes.length);
+      
+      if (currentGeneIndex < maxGenes - 1) {
+        loadGene(currentGeneIndex + 1);
+      } else if (currentCaseIndex < patients.length - 1) {
+        loadCase(currentCaseIndex + 1);
+      }
+    }
+
+    function exportEvaluations() {
+      const rows = [
+        ['patient_id', 'gene_name', 'is_causal', 'final_rank', 'traceability', 'phenotype_match', 'factuality', 'actionability', 'confidence', 'interpretability', 'preferred_source', 'notes', 'timestamp']
+      ];
+
+      Object.values(evaluations).forEach(e => {
+        rows.push([
+          e.patient_id,
+          e.gene_name,
+          e.is_causal,
+          e.final_rank,
+          e.traceability || '',
+          e.phenotype_match || '',
+          e.factuality || '',
+          e.actionability || '',
+          e.confidence || '',
+          e.interpretability || '',
+          (e.preferred_source || []).join(';'),
+          `"${(e.notes || '').replace(/"/g, '""')}"`,
+          e.timestamp || ''
+        ]);
+      });
+
+      const csv = rows.map(r => r.join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `geneva_evaluations_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      
+      URL.revokeObjectURL(url);
+    }
+  </script>
+
+</body>
+</html>
